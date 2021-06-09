@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Todo } from '../../models/Todo';
+import {Todo} from "../../models/Todo";
+import {History} from "../../models/History";
 
 @Component({
   selector: 'app-todos',
@@ -7,48 +8,83 @@ import { Todo } from '../../models/Todo';
   styleUrls: ['./todos.component.css']
 })
 export class TodosComponent implements OnInit {
-
   todos:Todo[] = [];
+  history:History[] = [];
 
   inputTodo:string = "";
 
   constructor() { }
 
-  ngOnInit(): void {
-    this.todos = [
-      {
-        content: 'First todo',
-        completed: false
-      },
-      {
-        content: 'Second todo',
-        completed: false
-      }
-    ];
-  }
+  saveLocal = () =>{
+    localStorage.setItem('todos',JSON.stringify(this.todos))
+  };
+  saveHistory = (method:string, item:object) =>{
+    this.history.push({
+      method: method,
+      item: item
+    });
+    sessionStorage.setItem('history', JSON.stringify(this.history));
+  };
 
-  toggleDone (id:number) {
-    this.todos.map((v, i) => {
-      if (i == id) v.completed = !v.completed;
-
-      return v;
-    })
-  }
-
-  deleteTodo (id:number) {
-    this.todos = this.todos.filter((v, i) => i !== id);
-  }
-
-  addTodo () {
-    if(this.inputTodo != ""){
-      this.todos.push({
-        content: this.inputTodo,
-        completed: false
-      });
-  
-      this.inputTodo = "";
+  fetchTodos(){
+    if((localStorage.getItem('todos') == null) || ((localStorage.getItem('todos')?.length) == 2) ) {
+      console.log((localStorage.getItem('todos')?.length));
+      this.todos = [];
+      fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
+        .then(response => response.json())
+        .then(json => this.todos = json)
+        .then( () => console.log(this.todos))
+        .then(()=> this.saveLocal)
+        .then(()=> console.log('fetched'))
+    } else{
+      this.todos = JSON.parse(localStorage.getItem('todos') || '{}');
+      console.log('cashed');
     }
+  };
 
+  ngOnInit():void {
+    console.log((localStorage.getItem('todos')));
+     this.fetchTodos();
+  };
+
+  removeTodo (id: number){
+    const elem = this.todos.filter((item, index)=> index == id);
+    this.saveHistory('removeTodo', elem);
+    this.todos = this.todos.filter((item, index) => index !== id);
+    this.saveLocal();
+  };
+
+  editTodo (id:number){
+    const elem = this.todos.filter((item, index)=> index == id);
+    this.inputTodo = elem[0].title;
+    console.log('elem',elem);
+    console.log('inputTodo',this.inputTodo)
+  }
+
+  toggleComplete(id: number){
+    const elem = this.todos.filter((item, index)=> index == id);
+    this.saveHistory('toggleComplete', elem);
+    this.todos.map((item, index) =>{
+      if (id == index){
+        item.completed = !item.completed
+      }
+    });
+    this.saveLocal();
+  };
+
+  addTodo(){
+    if(this.inputTodo !=""){
+      let elem = {
+        userId: 1,
+        id: this.todos.length,
+        title: this.inputTodo,
+        completed: false
+      };
+      this.todos.push(elem);
+      this.saveLocal();
+      this.saveHistory('addTodo', elem);
+    }
+    this.inputTodo = "";
   }
 
 }
