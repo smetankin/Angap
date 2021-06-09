@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Todo } from './../../models/Todo';
+import { Todo } from '../../models/Todo';
 
 @Component({
   selector: 'app-todos',
@@ -8,7 +8,7 @@ import { Todo } from './../../models/Todo';
 })
 export class TodosComponent implements OnInit {
 
-  todos:Todo[];
+  todos:Todo[] = [];
 
   inputTodo:string = "";
 
@@ -40,7 +40,7 @@ export class TodosComponent implements OnInit {
   }
 
   addTodo () {
-    if(this,this.inputTodo != ""){
+    if(this.inputTodo != ""){
       this.todos.push({
         content: this.inputTodo,
         completed: false
