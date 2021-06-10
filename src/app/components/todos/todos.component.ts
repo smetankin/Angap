@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {Todo} from "../../models/Todo";
 import {History} from "../../models/History";
+import {MatDialog} from "@angular/material/dialog";
+import {DialogComponent} from "../dialog/dialog.component";
+import {DialogService} from "../../services/dialog.service";
 
 @Component({
   selector: 'app-todos',
@@ -13,7 +16,38 @@ export class TodosComponent implements OnInit {
 
   inputTodo:string = "";
 
-  constructor() { }
+  constructor(
+    private dialogService: DialogService,
+    private dialog: MatDialog){}
+
+  openDialog(id: number) {
+    const dialogRef = this.dialog.open(DialogComponent,{
+      data:{
+              message: 'enter new value, please!',
+              buttonText: {
+                ok: 'Save',
+                cancel: 'No'
+              }
+            }
+    });
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.editTodo(id)
+      }
+    });
+  }
+
+
+  editTodo (id:number){
+    const elem = this.todos.filter((item, index)=> index == id);
+    this.saveHistory('toggleComplete', elem);
+    this.todos.map((item, index) =>{
+      if (id == index){
+        item.title = this.dialogService.newValue;
+      }
+    });
+    this.saveLocal();
+  }
 
   saveLocal = () =>{
     localStorage.setItem('todos',JSON.stringify(this.todos))
@@ -42,24 +76,12 @@ export class TodosComponent implements OnInit {
     }
   };
 
-  ngOnInit():void {
-    console.log((localStorage.getItem('todos')));
-     this.fetchTodos();
-  };
-
   removeTodo (id: number){
     const elem = this.todos.filter((item, index)=> index == id);
     this.saveHistory('removeTodo', elem);
     this.todos = this.todos.filter((item, index) => index !== id);
     this.saveLocal();
   };
-
-  editTodo (id:number){
-    const elem = this.todos.filter((item, index)=> index == id);
-    this.inputTodo = elem[0].title;
-    console.log('elem',elem);
-    console.log('inputTodo',this.inputTodo)
-  }
 
   toggleComplete(id: number){
     const elem = this.todos.filter((item, index)=> index == id);
@@ -86,5 +108,12 @@ export class TodosComponent implements OnInit {
     }
     this.inputTodo = "";
   }
+
+  ngOnInit():void {
+    console.log((localStorage.getItem('todos')));
+     this.fetchTodos();
+  };
+
+
 
 }

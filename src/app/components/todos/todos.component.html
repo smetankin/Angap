@@ -14,6 +14,6 @@
     <div class="id">{{ i }}</div>
     <div class="content" (click)="toggleComplete(i)">{{ todo.title }}</div>
     <button class="delete" (click)="removeTodo(i)">Remove</button>
-    <button class="delete" (click)="editTodo(i)">edit</button>
+    <button mat-button (click)="openDialog(i)">edit</button>
   </div>
 </div>
