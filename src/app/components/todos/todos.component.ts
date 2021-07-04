@@ -95,6 +95,7 @@ export class TodosComponent implements OnInit {
   };
 
   addTodo(){
+    console.log('fixed');
     console.log('added');
     if(this.inputTodo !=""){
       let elem = {
