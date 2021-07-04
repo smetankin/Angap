@@ -98,7 +98,7 @@ export class TodosComponent implements OnInit {
     if(this.inputTodo !=""){
       let elem = {
         userId: 1,
-        id: this.todos.length,
+        id: Date.now(),
         title: this.inputTodo,
         completed: false
       };
